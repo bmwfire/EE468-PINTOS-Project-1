@@ -181,13 +181,14 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
   thread_tick ();
 
-/* As long the list are not empty
+/* As long the list are not empty, sleep occur in the beginning of the list
    List_empty, front, etc can be find in src/lib/kernel/list.c*/
 
   while(!list_empty(&list_sleep)){
     head = list_front(&list_sleep)
     head_thread = list_entry(head, struct thread, elem);
 
+/*loop stop if awake */
     if(head_thread->waketick > ticks)
     break;
 
