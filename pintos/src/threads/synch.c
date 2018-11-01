@@ -340,16 +340,16 @@ cond_wait (struct condition *cond, struct lock *lock)
   waiter.highest_priority = thread_current()->priority; /* current thread is
                                                            the only waiting
                                                           thread for semaphore*/
-  printf("cond_wait: inserting into list\n");
+  //printf("cond_wait: inserting into list\n");
   list_insert_ordered (&cond->waiters, &waiter.elem, priority_semaphore_compare,
                        NULL);
-  printf("cond_wait: releasing lock\n");
+  //printf("cond_wait: releasing lock\n");
   lock_release (lock);
-  printf("cond_wait: putting sema down\n");
+  //printf("cond_wait: putting sema down\n");
   sema_down (&waiter.semaphore);
-  printf("cond_wait: acquiring lock\n");
+  //printf("cond_wait: acquiring lock\n");
   lock_acquire (lock);
-  printf("cond_wait: lock acquired \n");
+  //printf("cond_wait: lock acquired \n");
 }
 
 /* If any threads are waiting on COND (protected by LOCK), then
@@ -405,7 +405,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
 
   if(list_empty(&(l_1->semaphore.waiters)))
   {
-    printf("lock_priority_compare(): list l1 empty \n");
+    //printf("lock_priority_compare(): list l1 empty \n");
     highest_priority_e1 = -1;
   } else
   {
@@ -414,7 +414,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
 
   if(list_empty(&(l_2->semaphore.waiters)))
   {
-    printf("lock_priority_compare(): list l2 empty \n");
+    //printf("lock_priority_compare(): list l2 empty \n");
     highest_priority_e2 = -1;
   } else
   {
