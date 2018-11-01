@@ -119,7 +119,7 @@ sema_up (struct semaphore *sema)
 
   if (!list_empty (&sema->waiters))
   { // unblock all threads waiting for sema_up
-    waiting_thread = list_entry (list_pop_back (&sema->waiters), struct thread, elem);
+    waiting_thread = list_entry (list_pop_front (&sema->waiters), struct thread, elem);
     thread_unblock(waiting_thread);
   }
 
