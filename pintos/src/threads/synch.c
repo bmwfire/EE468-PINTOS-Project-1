@@ -403,7 +403,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   struct lock *l_1 = list_entry(e_1, struct lock, lock_list_elem);
   struct lock *l_2 = list_entry(e_2, struct lock, lock_list_elem);
 
-  if(list_empty(l_1->semaphore.waiters))
+  if(list_empty(&(l_1->semaphore.waiters)))
   {
     printf("lock_priority_compare(): list l1 empty \n");
     highest_priority_e1 = -1;
@@ -411,8 +411,8 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   {
     highest_priority_e1 = list_entry(list_begin(&(l_1->semaphore.waiters)), struct thread, elem)->priority;
   }
-  
-  if(list_empty(l_2->semaphore.waiters))
+
+  if(list_empty(&(l_2->semaphore.waiters)))
   {
     printf("lock_priority_compare(): list l2 empty \n");
     highest_priority_e2 = -1;
