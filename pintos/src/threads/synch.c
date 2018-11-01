@@ -117,7 +117,7 @@ sema_up (struct semaphore *sema)
 
   old_level = intr_disable ();
 
-  if (!list_empty (&sema->waiters))
+  while (!list_empty (&sema->waiters))
   { // unblock all threads waiting for sema_up
     waiting_thread = list_entry (list_pop_front (&sema->waiters), struct thread, elem);
     thread_unblock(waiting_thread);
