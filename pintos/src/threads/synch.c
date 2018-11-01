@@ -260,7 +260,6 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock)
 {
-  struct thread *cur;
   enum intr_level old_level;
 
   ASSERT (lock != NULL);
@@ -396,8 +395,8 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   int highest_priority_e1;
   int highest_priority_e2;
 
-  const struct lock *l_1 = list_entry(e_1, struct lock, lock_list_elem);
-  const struct lock *l_2 = list_entry(e_2, struct lock, lock_list_elem);
+  struct lock *l_1 = list_entry(e_1, struct lock, lock_list_elem);
+  struct lock *l_2 = list_entry(e_2, struct lock, lock_list_elem);
 
   highest_priority_e1 = list_entry(list_begin(&(l_1->semaphore.waiters)), struct thread, elem)->priority;
   highest_priority_e2 = list_entry(list_begin(&(l_2->semaphore.waiters)), struct thread, elem)->priority;
@@ -415,8 +414,8 @@ bool priority_semaphore_compare(const struct list_elem *e_1, const struct list_e
   ASSERT(e_1 != NULL);
   ASSERT(e_2 != NULL);
 
-  struct semaphore_elem *s_1 = list_entry(s_1, struct semaphore_elem, elem);
-  struct semaphore_elem *s_2 = list_entry(s_2, struct semaphore_elem, elem);
+  struct semaphore_elem *s_1 = list_entry(e_1, struct semaphore_elem, elem);
+  struct semaphore_elem *s_2 = list_entry(e_2, struct semaphore_elem, elem);
 
   return s_1->highest_priority > s_2->highest_priority;
 }
