@@ -117,7 +117,7 @@ sema_up (struct semaphore *sema)
 
   old_level = intr_disable ();
 
-  while (!list_empty (&sema->waiters))
+  if (!list_empty (&sema->waiters))
   { // unblock all threads waiting for sema_up
     waiting_thread = list_entry (list_pop_front (&sema->waiters), struct thread, elem);
     thread_unblock(waiting_thread);
@@ -401,7 +401,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   highest_priority_e1 = list_entry(list_begin(&(l_1->semaphore.waiters)), struct thread, elem)->priority;
   highest_priority_e2 = list_entry(list_begin(&(l_2->semaphore.waiters)), struct thread, elem)->priority;
 
-  return highest_priority_e1 > highest_priority_e2;
+  return highest_priority_e1 >= highest_priority_e2;
 }
 
 /* used in list_insert_ordered() calls implemented in list.c.
