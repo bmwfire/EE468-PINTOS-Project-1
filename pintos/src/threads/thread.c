@@ -380,8 +380,8 @@ thread_set_thread_priority (struct thread *thread, int new_priority)
 
   if (thread->status == THREAD_READY)
   {
-    list_remove(&cur->elem);
-    list_insert_ordered(&ready_list, &cur->elem, priority_compare, NULL);
+    list_remove(&thread->elem);
+    list_insert_ordered(&ready_list, &thread->elem, priority_compare, NULL);
   } else if (thread->status == THREAD_RUNNING &&
              thread->priority < head_of_ready_list->priority)
   {
