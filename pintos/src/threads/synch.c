@@ -415,8 +415,8 @@ bool priority_semaphore_compare(const struct list_elem *e_1, const struct list_e
   ASSERT(e_1 != NULL);
   ASSERT(e_2 != NULL);
 
-  struct semaphore_elem *e_1 = list_entry(e_1, struct semaphore_elem, elem);
-  struct semaphore_elem *e_2 = list_entry(e_2, struct semaphore_elem, elem);
+  struct semaphore_elem *s_1 = list_entry(s_1, struct semaphore_elem, elem);
+  struct semaphore_elem *s_2 = list_entry(s_2, struct semaphore_elem, elem);
 
-  return e_1->highest_priority > e_2->highest_priority;
+  return s_1->highest_priority > s_2->highest_priority;
 }
