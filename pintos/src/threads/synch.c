@@ -339,11 +339,15 @@ cond_wait (struct condition *cond, struct lock *lock)
   sema_init (&waiter.semaphore, 0);
   waiter.highest_priority = thread_current()->priority; /* current thread is
                                                            the only waiting
-                                                           thread for semaphore*/
+                                                          thread for semaphore*/
+  printf("cond_wait: inserting into list\n");
   list_insert_ordered (&cond->waiters, &waiter.elem, priority_semaphore_compare,
                        NULL);
+  printf("cond_wait: releasing lock\n");
   lock_release (lock);
+  printf("cond_wait: putting sema down\n");
   sema_down (&waiter.semaphore);
+  printf("cond_wait: acquiring lock\n");
   lock_acquire (lock);
 }
 
