@@ -119,8 +119,7 @@ sema_up (struct semaphore *sema)
 
   if (!list_empty (&sema->waiters))
   { // unblock all threads waiting for sema_up
-    waiting_thread = list_entry (list_pop_back (&sema->waiters), struct thread,
-                                                  elem));
+    waiting_thread = list_entry (list_pop_back (&sema->waiters), struct thread, elem);
     thread_unblock(waiting_thread);
   }
 
@@ -216,7 +215,7 @@ lock_acquire (struct lock *lock)
   struct thread * cur;
   enum intr_level old_level;
 
-  old_level = intr_disable()
+  old_level = intr_disable();
   cur = thread_current();
 
   if(lock->holder != NULL)
@@ -227,7 +226,7 @@ lock_acquire (struct lock *lock)
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
   lock->holder->waiting_for_lock = NULL;
-  list_insert_ordered(&lock-holder->locks, &lock->lock_list_elem,
+  list_insert_ordered(&lock->holder->locks, &lock->lock_list_elem,
                       lock_priority_compare, NULL);
 
   intr_set_level (old_level);
@@ -267,13 +266,12 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  cur = thread_current();
-  old_level = intr_disable
+  old_level = intr_disable();
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 
-  list_remove(&lock->elem_lock); /* remove lock from thread's list of locks */
+  list_remove(&lock->lock_list_elem); /* remove lock from thread's list of locks */
 
   intr_set_level(old_level);
 }
@@ -398,11 +396,11 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   int highest_priority_e1;
   int highest_priority_e2;
 
-  const struct lock *e_1 = list_entry(e_1, struct lock, elem_lock);
-  const struct lock *e_2 = list_entry(e_2, struct lock, elem_lock);
+  const struct lock *l_1 = list_entry(e_1, struct lock, lock_list_elem);
+  const struct lock *l_2 = list_entry(e_2, struct lock, lock_list_elem);
 
-  highest_priority_e1 = list_entry(list_begin(e_1->semaphore->waiters))->priority;
-  highest_priority_e2 = list_entry(list_begin(e_2->semaphore->waiters))->priority;
+  highest_priority_e1 = list_entry(list_begin(l_1->semaphore->waiters), struct thread, elem)->priority;
+  highest_priority_e2 = list_entry(list_begin(l_2->semaphore->waiters), struct thread, elem)->priority;
 
   return highest_priority_e1 > highest_priority_e2;
 }
