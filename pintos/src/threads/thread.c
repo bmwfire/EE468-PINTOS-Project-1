@@ -372,18 +372,18 @@ thread_set_thread_priority (struct thread *thread, int new_priority)
 
   old_level = intr_disable();
 
-  /* if thread is in THREA_READY, then insert into ready list, else if it is in
+  /* if thread is in THREAD_READY, then insert into ready list, else if it is in
   THREAD_RUNNING, compare threads new priority to largest thread in ready_list
   and yield if it is smaller. */
 
   head_of_ready_list = list_entry(list_begin(&ready_list), struct thread, elem);
 
-  if (cur->status == THREAD_READY)
+  if (thread->status == THREAD_READY)
   {
     list_remove(&cur->elem);
-    list_insert_ordered(&read_list, &cur->elem, priority_compare, NULL);
-  } else if (cur->status == THREAD_RUNNING &&
-             cur->priority < head_of_ready_list->priority)
+    list_insert_ordered(&ready_list, &cur->elem, priority_compare, NULL);
+  } else if (thread->status == THREAD_RUNNING &&
+             thread->priority < head_of_ready_list->priority)
   {
     thread_yield();
   }
@@ -635,7 +635,7 @@ uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 /* used in list_insert_ordered() calls implemented in list.c.
 Returns true when the thread containing e_1 has priority > the priority of the
 thread containing e_1, thus the list wil be in descending order. */
-static bool priority_compare(struct list_elem * e_1, struct list_elem * e_2,
+bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2,
   void *aux)
   {
     struct thread *t_1 = list_entry(e_1, struct thread, elem);

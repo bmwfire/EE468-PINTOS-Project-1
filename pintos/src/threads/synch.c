@@ -389,7 +389,7 @@ cond_broadcast (struct condition *cond, struct lock *lock)
 Returns true when the lock containing e_1 has highest_priority > the
 highest_priority of the semaphore containing e_1, thus the list wil be in
 descending order. */
-bool lock_priority_compare(struct list_elem *e_1, struct list_elem *e_2,
+bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *e_2,
                             void *aux)
 {
   ASSERT(e_1 != NULL);
@@ -411,7 +411,7 @@ bool lock_priority_compare(struct list_elem *e_1, struct list_elem *e_2,
 Returns true when the semaphore containing e_1 has highest_priority > the
 highest_priority of the semaphore containing e_1, thus the list wil be in
 descending order. */
-bool priority_semaphore_compare(struct list_elem *e_1, struct list_elem *e_2,
+bool priority_semaphore_compare(const struct list_elem *e_1, const struct list_elem *e_2,
                                 void *aux)
 {
   ASSERT(e_1 != NULL);
