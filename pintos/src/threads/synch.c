@@ -349,6 +349,7 @@ cond_wait (struct condition *cond, struct lock *lock)
   sema_down (&waiter.semaphore);
   printf("cond_wait: acquiring lock\n");
   lock_acquire (lock);
+  printf("cond_wait: lock acquired \n");
 }
 
 /* If any threads are waiting on COND (protected by LOCK), then
