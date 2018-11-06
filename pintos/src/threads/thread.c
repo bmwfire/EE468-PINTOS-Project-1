@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/fixed-point.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -412,7 +413,7 @@ thread_set_nice (int nice)
   B.2 [Calculating Priority], page 89). If the running thread no longer has the
   highest priority, yields." */
   /* TODO */
-  calculate_thread_priority();
+  calculate_thread_advanced_priority(thread_current(), NULL);
 
   if(cur != idle_thread)
   {
@@ -430,6 +431,28 @@ thread_set_nice (int nice)
       {
         thread_yield();
       }
+    }
+  }
+}
+
+void calculate_thread_advanced_priority(struct thread t, void *aux)
+{
+  /* Ensure passed thread is indeed a thread */
+  ASSERT(is_thread(t));
+
+  /* idle thread maintains priority PRI_MIN*/
+  if(t != idle_thread)
+  {
+    /* from PINTOS doc: priority = PRI_MAX - (recent_cpu / 4) - (nice * 2) */
+    t->priority = PRI_MAX - FIXED_TO_INT_ROUND_TOWARDS_NEAR(
+       FIXED_INT_DIVIDE(t->recent_cpu, 4)) - (t->nice * 2);
+    /* ensure that calculated priority falls within priority boundary */
+    if(t->priority < PRI_MIN)
+    {
+      t->priority = PRI_MIN;
+    } else if (t->priority > PRI_MAX)
+    {
+      t->priority = PRI_MAX;
     }
   }
 }

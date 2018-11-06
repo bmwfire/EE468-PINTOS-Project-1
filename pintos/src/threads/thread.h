@@ -91,6 +91,7 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int recent_cpu                      /* the recent CPU value of the thread stored as fixed-point */
     struct list_elem allelem;           /* List element for all threads list. */
     int nice;
 
@@ -146,5 +147,6 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2,
   void *aux);
+void calculate_thread_advanced_priority(struct thread t, NULL);
 
 #endif /* threads/thread.h */
