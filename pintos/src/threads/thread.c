@@ -400,17 +400,45 @@ thread_get_priority (void)
 
 /* Sets the current thread's nice value to NICE. */
 void
-thread_set_nice (int nice UNUSED)
+thread_set_nice (int nice)
 {
-  /* Not yet implemented. */
+  /* Ensure new nice value is within nice boundary */
+  ASSERT(nice >= NICE_MIN && nice <= NICE_MAX);
+
+  struct thread *cur = thread_current();
+  cur->nice = nice;
+
+  /* "recalculates the thread’s priority based on the new value (see Section
+  B.2 [Calculating Priority], page 89). If the running thread no longer has the
+  highest priority, yields." */
+  /* TODO */
+  calculate_thread_priority();
+
+  if(cur != idle_thread)
+  {
+    if(cur->status == THREAD_READY)
+    {
+      enum intr_level old_level;
+      old_level = intr_disable();
+      list_remove(&cur->elem);
+      list_insert_ordered(&ready_list, &cur->elem, priority_compare, NULL);
+      intr_set_level(old_level);
+    } else if (cur->status == THREAD_RUNNING)
+    {
+      if(list_entry(list_begin(&ready_list), struct thread, elem
+                   )->priority > cur->priority)
+      {
+        thread_yield();
+      }
+    }
+  }
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
@@ -514,8 +542,22 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->waiting_for_lock = NULL;
   list_push_back (&all_list, &t->allelem);
   list_init(&t->locks);
+
+  if(thread_mlfqs)
+  {
+    /* Initially nice = 0 (NICE_DEFAULT). But if thread is a child of another thread then
+    child inherits niceness from parent */
+    if (t == initial_thread)
+    {
+      t->nice = NICE_DEFAULT;
+    } else
+    {
+      t->nice = thread_get_nice();
+    }
+  }
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
