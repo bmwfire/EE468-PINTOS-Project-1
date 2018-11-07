@@ -214,6 +214,12 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  /* if mlfqs, then calculate advanced thread priority, niceness, recent_cpu */
+  if(thread_mlfqs)
+  {
+    calculate_thread_advanced_priority(t, NULL);
+  }
+
   /* check priority of new thread and schedule accordingly */
   if (t->priority > thread_current()->priority)
   {
