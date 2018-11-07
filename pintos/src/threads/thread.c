@@ -57,6 +57,7 @@ static long long user_ticks;    /* # of timer ticks in user programs. */
 /* Scheduling. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
+int load_avg;                   /* System load average used for mlfqs */
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -215,10 +216,10 @@ thread_create (const char *name, int priority,
   thread_unblock (t);
 
   /* if mlfqs, then calculate advanced thread priority, niceness, recent_cpu */
-  if(thread_mlfqs)
-  {
-    calculate_thread_advanced_priority(t, NULL);
-  }
+  // if(thread_mlfqs)
+  // {
+  //   calculate_thread_advanced_priority(t, NULL);
+  // }
 
   /* check priority of new thread and schedule accordingly */
   if (t->priority > thread_current()->priority)
@@ -418,7 +419,6 @@ thread_set_nice (int nice)
   /* "recalculates the thread’s priority based on the new value (see Section
   B.2 [Calculating Priority], page 89). If the running thread no longer has the
   highest priority, yields." */
-  /* TODO */
   calculate_thread_advanced_priority(thread_current(), NULL);
 
   if(cur != idle_thread)
@@ -441,15 +441,42 @@ thread_set_nice (int nice)
   }
 }
 
-void calculate_thread_advanced_priority(struct thread t, void *aux)
+void calculate_thread_recent_cpu(struct thread *t, void *aux)
 {
   /* Ensure passed thread is indeed a thread */
   ASSERT(is_thread(t));
 
-  /* idle thread maintains priority PRI_MIN*/
+  /* idle thread maintains recent_cpu  */
   if(t != idle_thread)
   {
-    /* from PINTOS doc: priority = PRI_MAX - (recent_cpu / 4) - (nice * 2) */
+    /* PINTOS doc:
+       recent_cpu = (2*load_avg)/(2*load_avg + 1) * recent_cpu + nice
+       You may need to think about the order of calculations in this formula.
+       We recommend computing the coefficient of recent cpu first,
+       then multiplying. */
+       int recent_cpu_coeff;
+       recent_cpu_coeff = FIXED_DIVISION(
+         FIXED_INT_MULTIPLY(load_avg, 2),
+         FIXED_INT_ADD(FIXED_INT_MULTIPLY(load_avg, 2), 1)
+       );
+
+       t->recent_cpu = FIXED_INT_ADD(
+         FIXED_MULTIPLY(recent_cpu_coeff, t->recent_cpu),
+         t->nice;
+       );
+  }
+}
+
+void calculate_thread_advanced_priority(struct thread *t, void *aux)
+{
+  /* Ensure passed thread is indeed a thread */
+  ASSERT(is_thread(t));
+
+  /* idle thread maintains priority PRI_MIN */
+  if(t != idle_thread)
+  {
+    /* PINTOS doc:
+       priority = PRI_MAX - (recent_cpu / 4) - (nice * 2) */
     t->priority = PRI_MAX - FIXED_TO_INT_ROUND_TOWARDS_NEAR(
        FIXED_INT_DIVIDE(t->recent_cpu, 4)) - (t->nice * 2);
     /* ensure that calculated priority falls within priority boundary */
@@ -482,8 +509,9 @@ thread_get_load_avg (void)
 int
 thread_get_recent_cpu (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return FIXED_TO_INT_ROUND_TOWARDS_NEAR(
+    FIXED_INT_MULTIPLY(thread_current()->recent_cpu, 100)
+  );
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -577,15 +605,23 @@ init_thread (struct thread *t, const char *name, int priority)
 
   if(thread_mlfqs)
   {
-    /* Initially nice = 0 (NICE_DEFAULT). But if thread is a child of another thread then
-    child inherits niceness from parent */
+    /* PINTOS doc:
+    Initially nice = 0 (NICE_DEFAULT). But if thread is a child of another thread then
+    child inherits niceness from parent
+
+    The initial value of recent cpu is 0 in the first thread created, or the
+    parent’s value in other new threads.*/
     if (t == initial_thread)
     {
       t->nice = NICE_DEFAULT;
+      t->recent_cpu = RECENT_CPU_DEFAULT;
     } else
     {
       t->nice = thread_get_nice();
+      t->recent_cpu = thread_get_recent_cpu();
     }
+
+    t->priority = calculate_thread_advanced_priority(t, NULL);
   }
 }
 

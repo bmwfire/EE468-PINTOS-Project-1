@@ -27,6 +27,8 @@ typedef int tid_t;
 #define NICE_MIN -20                       /* Lowest priority. */
 #define NICE_DEFAULT 0                  /* Default priority. */
 #define NICE_MAX 20                      /* Highest priority. */
+/* Thread Recent CPU */
+#define RECENT_CPU_DEFAULT 0
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -147,6 +149,7 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2,
   void *aux);
-void calculate_thread_advanced_priority(struct thread t, NULL);
+void calculate_thread_advanced_priority(struct thread *t, NULL);
+void calculate_thread_recent_cpu(struct thread *t, NULL);
 
 #endif /* threads/thread.h */
