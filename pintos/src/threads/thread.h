@@ -149,8 +149,8 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2,
   void *aux);
-void calculate_thread_advanced_priority(struct thread *t, NULL);
-void calculate_thread_recent_cpu(struct thread *t, NULL);
+void calculate_thread_advanced_priority(struct thread *t, void* aux);
+void calculate_thread_recent_cpu(struct thread *t, void* aux);
 void calculate_load_avg();
 
 #endif /* threads/thread.h */
