@@ -488,8 +488,8 @@ void calculate_thread_recent_cpu(struct thread *t, void *aux)
        );
 
        t->recent_cpu = FIXED_INT_ADD(
-         (FIXED_MULTIPLY(recent_cpu_coeff, t->recent_cpu)),
-         t->nice;
+         FIXED_MULTIPLY(recent_cpu_coeff, t->recent_cpu),
+         t->nice
        );
   }
 }
