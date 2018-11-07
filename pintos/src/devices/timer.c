@@ -199,6 +199,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
     }
     if(ticks % TIMER_FREQ == 0)
     {
+      calculate_load_avg();
       thread_foreach(calculate_thread_recent_cpu, NULL);
     }
     if(ticks % 4 == 0)

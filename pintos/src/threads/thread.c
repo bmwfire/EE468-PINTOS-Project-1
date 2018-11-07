@@ -104,6 +104,9 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+  /* PINTOS doc:
+    At system boot, load_avg is initialized to 0.*/
+    load_avg = 0;
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -441,6 +444,30 @@ thread_set_nice (int nice)
   }
 }
 
+/* PINTOS doc:
+   load_avg = (59/60)*load_avg + (1/60)*ready_threads,
+   where ready threads is the number of threads that are either running or ready
+   to run at time of update (not including the idle thread).
+*/
+void calculate_load_avg()
+{
+  struct thread *cur = thread_current();
+  int ready_threads = list_size(&ready_list);
+
+  /* if current thread is idle thread the ready_threads is the correct count,
+     else ready_threads is off by 1 since the current thread is THREAD_RUNNING
+  */
+  if(cur != idle_thread)
+  {
+    ready_threads = ready_threads + 1;
+  }
+
+  load_avg = FIXED_ADD(
+    FIXED_MULTIPLY(FIXED_INT_DIVIDE(CONVERT_TO_FIXED(59), 60), load_avg),
+    FIXED_INT_MULTIPLY(FIXED_INT_DIVIDE(CONVERT_TO_FIXED(1), 60), ready_threads)
+  );
+}
+
 void calculate_thread_recent_cpu(struct thread *t, void *aux)
 {
   /* Ensure passed thread is indeed a thread */
@@ -501,8 +528,7 @@ thread_get_nice (void)
 int
 thread_get_load_avg (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return FIXED_TO_INT_ROUND_TOWARDS_NEAR(FIXED_INT_MULTIPLY(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */

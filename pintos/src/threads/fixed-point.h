@@ -49,5 +49,7 @@ Dividing two fixed-point values x and y: ((int64_t) x) * f / y.
 #define FIXED_TO_INT_ROUND_TOWARDS_NEAR(x) ((x) >= 0 ? ((x) + (F) / 2) / (F) : ((x) - (F) / 2) / (F))
 #define FIXED_MULTIPLY(x, y) ((int64_t)(x)) * (y) / (F)
 #define FIXED_DIVISION(x, y) ((int64_t)(x)) * (F) / (y)
+#define FIXED_ADD(x, y) (x) + (y)
+#define FIXED_SUB(x, y) (x) - (y)
 
 #endif
