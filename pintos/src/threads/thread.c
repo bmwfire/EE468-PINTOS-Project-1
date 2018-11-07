@@ -106,7 +106,7 @@ thread_init (void)
   initial_thread->tid = allocate_tid ();
   /* PINTOS doc:
     At system boot, load_avg is initialized to 0.*/
-    load_avg = 0;
+  load_avg = 0;
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
