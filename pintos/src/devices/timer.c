@@ -101,8 +101,8 @@ timer_sleep (int64_t ticks)
     ASSERT (intr_get_level () == INTR_ON);
     current_level = intr_disable();
     current_thread = thread_current();
-    current_thread->waketick = timer_ticks() + ticks;
-    list_insert_ordered (&list_sleep, &current_thread->elem, cmp_waketick, NULL);
+    current_thread->priority = timer_ticks() + ticks;
+    list_insert_ordered (&list_sleep, &current_thread->elem, priority_compare, NULL);
     thread_block();
     intr_set_level(current_level);
 }
@@ -189,13 +189,9 @@ timer_interrupt (struct intr_frame *args UNUSED)
 /* As long the list are not empty, sleep occur in the beginning of the list
    List_empty, front, etc can be find in src/lib/kernel/list.c*/
 
-  while(!list_empty(&list_sleep)){
+  while(!list_empty(&list_sleep) && !(head_thread->priority > ticks)){
     head = list_front(&list_sleep)
     head_thread = list_entry(head, struct thread, elem);
-
-/*loop stop if awake */
-    if(head_thread->waketick > ticks)
-    break;
 
     list_remove(head);
     thread_unblock(head_thread);
