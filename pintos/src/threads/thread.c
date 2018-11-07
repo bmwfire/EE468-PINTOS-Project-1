@@ -488,7 +488,7 @@ void calculate_thread_recent_cpu(struct thread *t, void *aux)
        );
 
        t->recent_cpu = FIXED_INT_ADD(
-         FIXED_MULTIPLY(recent_cpu_coeff, t->recent_cpu),
+         (FIXED_MULTIPLY(recent_cpu_coeff, t->recent_cpu)),
          t->nice;
        );
   }
@@ -647,7 +647,7 @@ init_thread (struct thread *t, const char *name, int priority)
       t->recent_cpu = thread_get_recent_cpu();
     }
 
-    t->priority = calculate_thread_advanced_priority(t, NULL);
+    calculate_thread_advanced_priority(t, NULL);
   }
 }
 
