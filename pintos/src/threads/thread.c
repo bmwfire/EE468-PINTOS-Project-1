@@ -57,7 +57,7 @@ static long long user_ticks;    /* # of timer ticks in user programs. */
 /* Scheduling. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
-static int load_avg;                   /* System load average used for mlfqs */
+static int load_avg;            /* System load average used for mlfqs */
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -143,6 +143,7 @@ thread_tick (void)
   else
     kernel_ticks++;
 
+  printf("thread_tick: %d \n", thread_ticks);
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
