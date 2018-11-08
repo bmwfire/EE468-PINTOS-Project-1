@@ -95,7 +95,7 @@ struct thread
     struct list locks;
     struct lock *waiting_for_lock;
     int64_t wake;
-
+  
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -135,6 +135,7 @@ void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
+void thread_set_thread_priority (struct thread *thread, int new_priority);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
