@@ -641,5 +641,5 @@ bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2
     struct thread *t_1 = list_entry(e_1, struct thread, elem);
     struct thread *t_2 = list_entry(e_2, struct thread, elem);
 
-    return t_1->priority > t_2->priority;
+    return t_1->wake > t_2->wake;
   }
