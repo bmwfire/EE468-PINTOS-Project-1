@@ -143,7 +143,6 @@ thread_tick (void)
   else
     kernel_ticks++;
 
-  printf("thread_tick: %d \n", thread_ticks);
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
@@ -423,7 +422,7 @@ thread_set_nice (int nice)
   /* "recalculates the thread’s priority based on the new value (see Section
   B.2 [Calculating Priority], page 89). If the running thread no longer has the
   highest priority, yields." */
-  calculate_thread_advanced_priority(thread_current(), NULL);
+  calculate_thread_advanced_priority(cur, NULL);
 
   if(cur != idle_thread)
   {
@@ -683,10 +682,15 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void)
 {
-  if (list_empty (&ready_list))
+  if (list_empty (&ready_list)){
+    printf("scheduling idle thread \n");
     return idle_thread;
-  else
-    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+  }
+  else{
+    struct thread *t = list_entry (list_pop_front (&ready_list), struct thread, elem);
+    printf("scheduling thread: %s \n", t->name);
+    return t;
+  }
 }
 
 /* Completes a thread switch by activating the new thread's page
