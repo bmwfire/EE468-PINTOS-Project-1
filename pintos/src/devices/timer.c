@@ -205,6 +205,8 @@ timer_interrupt (struct intr_frame *args UNUSED)
     if(ticks % 4 == 0)
     {
       thread_foreach(calculate_thread_advanced_priority, NULL);
+      /* resort ready_list */
+      sort_ready_list();
     }
   }
 }

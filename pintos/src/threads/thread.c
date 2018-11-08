@@ -57,7 +57,7 @@ static long long user_ticks;    /* # of timer ticks in user programs. */
 /* Scheduling. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
-int load_avg;                   /* System load average used for mlfqs */
+static int load_avg;                   /* System load average used for mlfqs */
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -494,7 +494,8 @@ void calculate_thread_recent_cpu(struct thread *t, void *aux)
   }
 }
 
-void calculate_thread_advanced_priority(struct thread *t, void *aux)
+void
+calculate_thread_advanced_priority(struct thread *t, void *aux)
 {
   /* Ensure passed thread is indeed a thread */
   ASSERT(is_thread(t));
@@ -514,6 +515,15 @@ void calculate_thread_advanced_priority(struct thread *t, void *aux)
     {
       t->priority = PRI_MAX;
     }
+  }
+}
+
+void
+sort_ready_list()
+{
+  if(!list_empty(&ready_list))
+  {
+    list_sort(&ready_list, priority_compare, NULL);
   }
 }
 

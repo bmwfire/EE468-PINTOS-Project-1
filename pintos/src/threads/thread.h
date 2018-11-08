@@ -152,5 +152,6 @@ bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2
 void calculate_thread_advanced_priority(struct thread *t, void* aux);
 void calculate_thread_recent_cpu(struct thread *t, void* aux);
 void calculate_load_avg(void);
+void sort_ready_list(void);
 
 #endif /* threads/thread.h */
