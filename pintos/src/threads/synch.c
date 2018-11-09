@@ -438,18 +438,18 @@ cond_broadcast (struct condition *cond, struct lock *lock)
     cond_signal (cond, lock);
 }
 
-bool priority_compare(const struct list_elem *e_1,
-                      const struct list_elem *e_2,
-                      void *aux UNUSED)
-{
-  ASSERT(e_1 != NULL);
-  ASSERT(e_2 != NULL);
-
-  const struct thread *t_1 = list_entry(e_1, struct thread, elem);
-  const struct thread *t_2 = list_entry(e_2, struct thread, elem);
-
-  return t_1->priority > t_2->priority;
-}
+//bool priority_compare(const struct list_elem *e_1,
+//                      const struct list_elem *e_2,
+//                      void *aux UNUSED)
+//{
+//  ASSERT(e_1 != NULL);
+//  ASSERT(e_2 != NULL);
+//
+//  const struct thread *t_1 = list_entry(e_1, struct thread, elem);
+//  const struct thread *t_2 = list_entry(e_2, struct thread, elem);
+//
+//  return t_1->priority > t_2->priority;
+//}
 
 /* used in list_insert_ordered() calls implemented in list.c.
 Returns true when the lock containing e_1 has highest_priority > the
