@@ -459,7 +459,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
                             void *aux)
 {
   ASSERT(e_1 != NULL);
-  ASSERT(e_1 != NULL);
+  ASSERT(e_2 != NULL);
 
 //  int highest_priority_e1;
 //  int highest_priority_e2;
