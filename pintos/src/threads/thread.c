@@ -384,7 +384,7 @@ thread_current (void)
      of stack, so a few big automatic arrays or moderate
      recursion can cause stack overflow. */
   ASSERT (is_thread (t));
-  //ASSERT (t->status == THREAD_RUNNING);
+  ASSERT (t->status == THREAD_RUNNING);
 
   return t;
 }
@@ -773,12 +773,12 @@ static struct thread *
 next_thread_to_run (void)
 {
   if (list_empty (&ready_list)){
-    printf("scheduling idle thread \n");
+    //printf("scheduling idle thread \n");
     return idle_thread;
   }
   else{
     struct thread *t = list_entry (list_pop_front (&ready_list), struct thread, elem);
-    printf("scheduling thread: %s \n", t->name);
+    //printf("scheduling thread: %s \n", t->name);
     return t;
   }
 }
