@@ -99,6 +99,7 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
+    int64_t sleep_till; //sleep thread until ticks happen, wake up (used for timer device)
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
@@ -142,5 +143,8 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 bool priority_compare(const struct list_elem * e_1, const struct list_elem * e_2,
   void *aux);
+
+void thread_sleep (int64_t ticks, int64_t start_ticks);
+void thread_check_wake(int64_t ticks);
 
 #endif /* threads/thread.h */

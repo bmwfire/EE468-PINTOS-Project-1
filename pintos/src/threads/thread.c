@@ -31,6 +31,12 @@ static struct list blocked_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
+//lists all processes that are sleeping, order is highest sleep_till at head
+static struct list sleep_list;
+
+//lists all processes that are to be woken up (used only for )
+static struct list awake_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -73,6 +79,10 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
+void thread_sleep (int64_t ticks, int64_t start_ticks);
+static bool sleep_less (const struct list_elem *a_, const struct list_elem *b_, void *aux UNUSED);
+static bool priority_less (const struct list_elem *a_, const struct list_elem *b_, void *aux UNUSED);
+void thread_check_wake(int64_t ticks);
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -96,6 +106,8 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
   list_init (&blocked_list);
+  list_init (&sleep_list);
+  list_init (&awake_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -258,6 +270,82 @@ thread_unblock (struct thread *t)
   list_insert_ordered (&ready_list, &t->elem, priority_compare, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
+}
+void
+thread_sleep (int64_t ticks, int64_t start_ticks)
+{
+  enum intr_level prev_intr_level;//save old interrupt level status
+
+  struct thread *current = thread_current();//acquire current thread
+
+  if((int) ticks <= 0){//special case of sleep for 0 ticks
+    return;
+  }
+
+  current->sleep_till = ticks + start_ticks;//inform thread when it can wake up
+
+  prev_intr_level = intr_disable(); //disable interrupts and record previous interrupt status
+
+  //insert current thread into the sleep_list list. use sleep_less to order the list
+  //highest sleep_till value is at the beggining of the list
+  list_insert_ordered(&sleep_list, &current->elem, sleep_less, NULL);
+
+  //block the thread
+  thread_block();
+  //set interrupt level to previous level
+  intr_set_level(prev_intr_level);
+}
+
+//function for checking which elem has a lower sleep_till value. True if a is more than b
+//based on value_less()
+//orders highest wait time closest to head
+static bool
+sleep_less (const struct list_elem *a_, const struct list_elem *b_, void *aux UNUSED){
+    const struct thread *a = list_entry (a_, struct thread, elem);
+    const struct thread *b = list_entry (b_, struct thread, elem);
+
+    return a->sleep_till > b->sleep_till;//NOTE I switched the inequality
+}
+
+//orders with highest priority closes to the head
+static bool
+priority_less (const struct list_elem *a_, const struct list_elem *b_, void *aux UNUSED){
+    const struct thread *a = list_entry (a_, struct thread, elem);
+    const struct thread *b = list_entry (b_, struct thread, elem);
+
+    return a->priority > b->priority;
+}
+
+//function for checking if a thread needs to be woken up, then waking it up if needed
+void
+thread_check_wake(int64_t ticks){
+
+  //if sleep list is empty then end check
+  if(list_rbegin(&sleep_list) == list_head(&sleep_list)){
+    return;
+  }
+
+  if(list_entry(list_rbegin(&sleep_list), struct thread, elem)->sleep_till <= ticks){
+    enum intr_level prev_intr_level;//save old interrupt level status
+
+    prev_intr_level = intr_disable();//disable interrupts and save old status
+
+    //unblock threads that no longer need to sleep
+    while(list_entry(list_rbegin(&sleep_list), struct thread, elem)->sleep_till <= ticks && !list_empty(&sleep_list)){
+      struct list_elem *temp_le = list_rbegin(&sleep_list);
+      list_pop_back(&sleep_list);
+      list_insert_ordered(&awake_list, temp_le, priority_less, NULL );
+    }
+    while(!list_empty(&awake_list)){
+      struct thread *temp_thread_elem = list_entry(list_begin(&awake_list), struct thread, elem);
+      list_pop_front(&awake_list);
+      thread_unblock(temp_thread_elem);
+    }
+
+    //set interrupt level to previous level
+    intr_set_level(prev_intr_level);
+  }
+
 }
 
 /* Returns the name of the running thread. */
