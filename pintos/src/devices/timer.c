@@ -189,26 +189,26 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-  // if(thread_mlfqs)
-  // {
-  //   struct thread *cur = thread_current();
-  //
-  //   if(cur->status == THREAD_RUNNING)
-  //   {
-  //     cur->recent_cpu = FIXED_INT_ADD(cur->recent_cpu, 1);
-  //   }
-  //   if(ticks % TIMER_FREQ == 0)
-  //   {
-  //     calculate_load_avg();
-  //     thread_foreach(calculate_thread_recent_cpu, NULL);
-  //   }
-  //   if(ticks % 4 == 0)
-  //   {
-  //     thread_foreach(calculate_thread_advanced_priority, NULL);
-  //     /* resort ready_list */
-  //     sort_ready_list();
-  //   }
-  // }
+  if(thread_mlfqs)
+  {
+    struct thread *cur = thread_current();
+
+    if(cur->status == THREAD_RUNNING)
+    {
+      cur->recent_cpu = FIXED_INT_ADD(cur->recent_cpu, 1);
+    }
+    if(ticks % TIMER_FREQ == 0)
+    {
+      calculate_load_avg();
+      thread_foreach(calculate_thread_recent_cpu, NULL);
+    }
+    if(ticks % 4 == 0)
+    {
+      thread_foreach(calculate_thread_advanced_priority, NULL);
+      /* resort ready_list */
+      sort_ready_list();
+    }
+  }
   //check if tail and any elems of equivalent sleep_till needs to be woken up
   //NOTE: disable interrupts when removing from list and unblocking.
   thread_check_wake(timer_ticks());
