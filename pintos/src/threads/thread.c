@@ -467,13 +467,12 @@ thread_set_thread_priority (struct thread *thread, int new_priority)
 {
   enum intr_level old_level;
   struct thread *head_of_ready_list;
+  old_level = intr_disable();
 
   ASSERT(new_priority >= PRI_MIN && new_priority <= PRI_MAX);
   ASSERT(is_thread(thread));
 
   thread->priority = new_priority;
-
-  old_level = intr_disable();
 
   /* if thread is in THREAD_READY, then insert into ready list, else if it is in
   THREAD_RUNNING, compare threads new priority to largest thread in ready_list
