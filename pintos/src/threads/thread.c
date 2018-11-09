@@ -231,10 +231,13 @@ thread_create (const char *name, int priority,
   thread_unblock (t);
 
   /* if mlfqs, then calculate advanced thread priority, niceness, recent_cpu */
-  // if(thread_mlfqs)
-  // {
-  //   calculate_thread_advanced_priority(t, NULL);
-  // }
+  if(thread_mlfqs)
+  {
+     calculate_thread_recent_cpu(t, NULL);
+     calculate_thread_advanced_priority(t, NULL);
+     calculate_thread_recent_cpu(thread_current(), NULL);
+     calculate_thread_advanced_priority(thread_current(), NULL);
+  }
 
   /* check priority of new thread and schedule accordingly */
   if (t->priority > thread_current()->priority)
@@ -722,7 +725,6 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   t->waiting_for_lock = NULL;
-  list_push_back (&all_list, &t->allelem);
   list_init(&t->locks);
 
   if(thread_mlfqs)
@@ -743,8 +745,10 @@ init_thread (struct thread *t, const char *name, int priority)
       t->recent_cpu = thread_get_recent_cpu();
     }
 
-    calculate_thread_advanced_priority(t, NULL);
+    //calculate_thread_advanced_priority(t, NULL);
   }
+
+  list_push_back (&all_list, &t->allelem);
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
