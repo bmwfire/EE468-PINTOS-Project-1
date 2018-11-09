@@ -36,7 +36,7 @@ static struct list all_list;
 static struct list sleep_list;
 
 //lists all processes that are to be woken up (used only for )
-static struct list awake_list;
+//static struct list awake_list;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -109,7 +109,7 @@ thread_init (void)
   list_init (&all_list);
   list_init (&blocked_list);
   list_init (&sleep_list);
-  list_init (&awake_list);
+  //list_init (&awake_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -342,16 +342,19 @@ thread_check_wake(int64_t ticks){
     prev_intr_level = intr_disable();//disable interrupts and save old status
 
     //unblock threads that no longer need to sleep
-    while(list_entry(list_rbegin(&sleep_list), struct thread, elem)->sleep_till <= ticks && !list_empty(&sleep_list)){
-      struct list_elem *temp_le = list_rbegin(&sleep_list);
-      list_pop_back(&sleep_list);
-      list_insert_ordered(&awake_list, temp_le, priority_less, NULL );
+    while(list_entry(list_rbegin(&sleep_list), struct thread, elem)->sleep_till
+        <= ticks && !list_empty(&sleep_list))
+    {
+      struct thread *temp_thread = list_entry(list_pop_back(&sleep_list));
+      thread_unblock(temp_thread);
+      //list_pop_back(&sleep_list);
+      //list_insert_ordered(&awake_list, temp_le, priority_less, NULL );
     }
-    while(!list_empty(&awake_list)){
-      struct thread *temp_thread_elem = list_entry(list_begin(&awake_list), struct thread, elem);
-      list_pop_front(&awake_list);
-      thread_unblock(temp_thread_elem);
-    }
+    // while(!list_empty(&awake_list)){
+    //   struct thread *temp_thread_elem = list_entry(list_begin(&awake_list), struct thread, elem);
+    //   list_pop_front(&awake_list);
+    //   thread_unblock(temp_thread_elem);
+    // }
 
     //set interrupt level to previous level
     intr_set_level(prev_intr_level);
