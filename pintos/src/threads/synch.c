@@ -196,6 +196,7 @@ lock_init (struct lock *lock)
 
   lock->holder = NULL;
   sema_init (&lock->semaphore, 1);
+  lock->priority_lock = PRIORITY_FAKE;
 }
 
 /* Acquires LOCK, sleeping until it becomes available if
@@ -469,7 +470,7 @@ bool lock_priority_compare(const struct list_elem *e_1, const struct list_elem *
   {
     highest_priority_e2 = list_entry(list_begin(&(l_2->semaphore.waiters)), struct thread, elem)->priority;
   }
-  return highest_priority_e1 >= highest_priority_e2;
+  return highest_priority_e1 >= highest_priority_e2; /* Change if errors */
 }
 
 /* used in list_insert_ordered() calls implemented in list.c.
