@@ -241,6 +241,7 @@ lock_acquire (struct lock *lock)
     if(lock_holder->waiting_for_lock != NULL && lock_iter < LOCK_LEVEL)
     {
       lock_next = lock_holder->waiting_for_lock;
+      list_sort(&lock_next->semaphore.waiters, priority_semaphore_compare, NULL);
       lock_holder = lock_holder->waiting_for_lock->holder;
       lock_iter++;
     } else
