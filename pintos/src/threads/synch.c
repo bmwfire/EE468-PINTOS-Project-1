@@ -69,7 +69,7 @@ sema_down (struct semaphore *sema)
   while (sema->value == 0)
     {
       list_insert_ordered (&sema->waiters, &thread_current()->elem,
-                           priority_semaphore_compare, NULL);
+                           priority_compare, NULL);
       thread_block ();
     }
   sema->value--;
@@ -437,6 +437,20 @@ cond_broadcast (struct condition *cond, struct lock *lock)
   while (!list_empty (&cond->waiters))
     cond_signal (cond, lock);
 }
+
+bool priority_compare(const struct list_elem *e_1,
+                      const struct list_elem *e_2,
+                      void *aux UNUSED)
+{
+  ASSERT(e_1 != NULL);
+  ASSERT(e_2 != NULL);
+
+  const struct thread *t_1 = list_entry(e_1, struct thread, elem);
+  const struct thread *t_2 = list_entry(e_2, struct thread, elem);
+
+  return t_1->priority > t_2->priority;
+}
+
 /* used in list_insert_ordered() calls implemented in list.c.
 Returns true when the lock containing e_1 has highest_priority > the
 highest_priority of the semaphore containing e_1, thus the list wil be in
