@@ -376,7 +376,7 @@ struct thread *
 thread_current (void)
 {
   struct thread *t = running_thread ();
-  printf("Thread Current status: $d \n", t->status);
+  printf("Thread Current status: %d \n", t->status);
 
   /* Make sure T is really a thread.
      If either of these assertions fire, then your thread may
