@@ -263,18 +263,38 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock)
 {
-  enum intr_level old_level;
-
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+  struct thread *curr;
+  enum intr_level old_level;
+  curr = thread_current();
   old_level = intr_disable();
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 
-  if(!thread_mlfqs){
+  if(!thread_mlfqs)
+  {
       list_remove(&lock->lock_list_elem); /* remove lock from thread's list of locks */
+      lock->priority_lock = PRIORITY_FAKE;
+
+      if(list_empty(&curr->locks))
+      {
+        curr->is_donated = false;
+        thread_set_priority(curr->priority_original);
+      }
+      else
+      {
+        struct lock *lock_first;
+        lock_first = list_entry(list_front(&curr->locks), struct lock,
+        lock_list_elem);
+
+        if(lock_first->priority_lock != PRIORITY_FAKE)
+          thread_given_set_priority(curr, lock_first->priority_lock, true);
+        else
+          thread_set_priority(curr->priority_original);
+      }
   }
   intr_set_level(old_level);
 }

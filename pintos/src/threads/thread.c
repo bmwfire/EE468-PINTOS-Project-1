@@ -248,6 +248,42 @@ thread_create (const char *name, int priority,
   return tid;
 }
 
+/* For Priority Donation */
+void thread_given_set_priority(struct thread *cur, int new_priority, bool
+                                is_donated)
+{
+  enum intr_level old_level;
+  old_level = intr_disable();
+
+  ASSERT(new_priority >= PRI_MIN && new_priority <= PRI_MAX);
+  ASSERT(is_thread(cur));
+
+  if(!is_donated)
+  {
+    if(cur->is_donated && new_priority <= cur->priority)
+      cur->priority_original = new_priority;
+    else
+      cur->priority = cur->priority_original = new_priority;
+  }
+  else
+  {
+    cur->priority = new_priority;
+    cur->is_donated = true;
+  }
+
+  if(cur->status == THREAD_READY)
+  {
+    list_remove(&cur->elem);
+    list_insert_ordered(&ready_list, &cur->elem, priority_compare, NULL);
+  }
+  else if(cur->status == THREAD_RUNNING && list_entry(list_begin(&ready_list),
+  struct thread, elem)->priority > cur->priority)
+  {
+    thread_yield();
+  }
+  intr_set_level(old_level);
+}
+
 /* Puts the current thread to sleep.  It will not be scheduled
    again until awoken by thread_unblock().
 
@@ -723,9 +759,12 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
-  t->magic = THREAD_MAGIC;
-  t->waiting_for_lock = NULL;
+
+  /* For Donation */
+  t->priority_original = priority;
+  t->is_donated = false;
   list_init(&t->locks);
+  t->waiting_for_lock = NULL;
 
   if(thread_mlfqs)
   {
@@ -747,7 +786,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
     //calculate_thread_advanced_priority(t, NULL);
   }
-
+  t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 }
 
