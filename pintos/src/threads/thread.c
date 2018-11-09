@@ -345,7 +345,7 @@ thread_check_wake(int64_t ticks){
     while(list_entry(list_rbegin(&sleep_list), struct thread, elem)->sleep_till
         <= ticks && !list_empty(&sleep_list))
     {
-      struct thread *temp_thread = list_entry(list_pop_back(&sleep_list));
+      struct thread *temp_thread = list_entry(list_pop_back(&sleep_list), struct thread, elem);
       thread_unblock(temp_thread);
       //list_pop_back(&sleep_list);
       //list_insert_ordered(&awake_list, temp_le, priority_less, NULL );
