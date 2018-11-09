@@ -376,7 +376,7 @@ struct thread *
 thread_current (void)
 {
   struct thread *t = running_thread ();
-  printf("Thread Current status: %d \n", t->status);
+  //printf("Thread Current status: %d \n", t->status);
 
   /* Make sure T is really a thread.
      If either of these assertions fire, then your thread may
@@ -384,7 +384,7 @@ thread_current (void)
      of stack, so a few big automatic arrays or moderate
      recursion can cause stack overflow. */
   ASSERT (is_thread (t));
-  ASSERT (t->status == THREAD_RUNNING);
+  //ASSERT (t->status == THREAD_RUNNING);
 
   return t;
 }
