@@ -7,6 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "threads/fixed-point.h"
 
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -168,11 +169,46 @@ timer_print_stats (void)
 }
 
 /* Timer interrupt handler. */
+/* PINTOS doc:
+   Each time a timer interrupt occurs, recent cpu is incremented
+   by 1 for the running thread only, unless the idle thread is running.
+
+   Thread priority is recalculated once every fourth clock tick, for every
+   thread.
+
+   Assumptions made by some of the tests require that these recalculations of
+   recent cpu be made exactly when the system tick counter reaches a multiple
+   of a second, that is, when timer_ticks () % TIMER_FREQ == 0, and not at
+   any other time.
+
+   The value of recent cpu can be negative for a thread with a negative nice
+   value. Do not clamp negative recent cpu to 0.
+ */
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  if(thread_mlfqs)
+  {
+    struct thread *cur = thread_current();
+
+    if(cur->status == THREAD_RUNNING)
+    {
+      cur->recent_cpu = FIXED_INT_ADD(cur->recent_cpu, 1);
+    }
+    if(ticks % TIMER_FREQ == 0)
+    {
+      calculate_load_avg();
+      thread_foreach(calculate_thread_recent_cpu, NULL);
+    }
+    if(ticks % 4 == 0)
+    {
+      thread_foreach(calculate_thread_advanced_priority, NULL);
+      /* resort ready_list */
+      sort_ready_list();
+    }
+  }
   //check if tail and any elems of equivalent sleep_till needs to be woken up
   //NOTE: disable interrupts when removing from list and unblocking.
   thread_check_wake(timer_ticks());

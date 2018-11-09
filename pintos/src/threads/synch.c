@@ -218,16 +218,19 @@ lock_acquire (struct lock *lock)
   old_level = intr_disable();
   cur = thread_current();
 
-  if(lock->holder != NULL)
+  if(lock->holder != NULL && !thread_mlfqs)
   {
     cur->waiting_for_lock = lock;
   }
 
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
-  lock->holder->waiting_for_lock = NULL;
-  list_insert_ordered(&lock->holder->locks, &lock->lock_list_elem,
-                      lock_priority_compare, NULL);
+  if(!thread_mlfqs)
+  {
+    lock->holder->waiting_for_lock = NULL;
+    list_insert_ordered(&lock->holder->locks, &lock->lock_list_elem,
+                        lock_priority_compare, NULL);
+  }
 
   intr_set_level (old_level);
 }
@@ -270,8 +273,9 @@ lock_release (struct lock *lock)
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 
-  list_remove(&lock->lock_list_elem); /* remove lock from thread's list of locks */
-
+  if(!thread_mlfqs){
+      list_remove(&lock->lock_list_elem); /* remove lock from thread's list of locks */
+  }
   intr_set_level(old_level);
 }
 
