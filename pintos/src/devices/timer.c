@@ -93,8 +93,9 @@ timer_sleep (int64_t ticks)
   int64_t start = timer_ticks ();
 
   ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks)
-    thread_yield ();
+  // while (timer_elapsed (start) < ticks)
+  //   thread_yield ();
+  thread_sleep(ticks, start);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -188,7 +189,6 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-
   if(thread_mlfqs)
   {
     struct thread *cur = thread_current();
@@ -209,6 +209,9 @@ timer_interrupt (struct intr_frame *args UNUSED)
       sort_ready_list();
     }
   }
+  //check if tail and any elems of equivalent sleep_till needs to be woken up
+  //NOTE: disable interrupts when removing from list and unblocking.
+  thread_check_wake(timer_ticks());
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
