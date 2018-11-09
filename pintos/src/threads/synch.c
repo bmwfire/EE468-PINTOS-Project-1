@@ -249,7 +249,7 @@ lock_acquire (struct lock *lock)
 
   sema_down (&lock->semaphore);
   lock->holder = thread_current (); /* Uncomment if fails test case */
-  //lock_holder = cur;
+  lock_holder = cur;
 
   if(!thread_mlfqs)
   {
