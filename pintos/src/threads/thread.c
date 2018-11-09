@@ -570,7 +570,7 @@ void calculate_thread_recent_cpu(struct thread *t, void *aux)
        We recommend computing the coefficient of recent cpu first,
        then multiplying. */
        int recent_cpu_coeff;
-       int load_temp
+       int load_temp;
        load_temp = FIXED_INT_MULTIPLY(load_avg, 2);
        recent_cpu_coeff = FIXED_DIVISION(load_temp, FIXED_INT_ADD(load_temp, 1));
        t->recent_cpu = FIXED_INT_ADD(
