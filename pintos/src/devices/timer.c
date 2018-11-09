@@ -211,7 +211,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   }
   //check if tail and any elems of equivalent sleep_till needs to be woken up
   //NOTE: disable interrupts when removing from list and unblocking.
-  //thread_check_wake(timer_ticks());
+  thread_check_wake(timer_ticks());
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
