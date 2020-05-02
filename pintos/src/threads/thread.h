@@ -23,6 +23,12 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
+
+/* Fake thread priority */
+#define PRIORITY_FAKE -1
+/* Lock deep level */
+#define LOCK_LEVEL 8
+
 /* Thread Niceness */
 #define NICE_MIN -20                       /* Lowest priority. */
 #define NICE_DEFAULT 0                  /* Default priority. */
@@ -101,6 +107,8 @@ struct thread
     struct list_elem elem;              /* List element. */
     struct list locks;
     struct lock *waiting_for_lock;
+    int priority_original;
+    bool is_donated;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -143,6 +151,8 @@ void thread_foreach (thread_action_func *, void *);
 int thread_get_priority (void);
 void thread_set_priority (int);
 void thread_set_thread_priority (struct thread *thread, int new_priority);
+
+void thread_given_set_priority(struct thread *, int, bool);
 
 int thread_get_nice (void);
 void thread_set_nice (int);
